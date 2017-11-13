@@ -22,18 +22,16 @@
 
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 
-int signal_freq = 1000;
-int cycle_period = int((100000/signal_freq)+0.5);
+int signal_freq = 500;  //set the initial speed
 int buttonReading = 1;
 signed long execute_time;
 unsigned long lastDebounceTime = 0;
-unsigned long debounceDelay = 15;
+unsigned long debounceDelay = 10;
 int buttonState = 0;
 int lastButtonState = 0;
-int steps = 5;  //how many steps to run
 int boundState = 1;
-int upperBoundFreq = 20000;
-int lowerBoundFreq = 2000;
+int upperBoundFreq = 1000;
+int lowerBoundFreq = 100;
 int potReading = 0;
 int oldReading; 
 int change;
@@ -42,7 +40,9 @@ int setReading;
 int dirVar;
 int lastDir = 0;
 int dirState = 0;
-int flip = 0;
+int iniDir = 0;
+
+String commandString;
 
 void setup() {
   // Use this initializer if you're using a 1.8" TFT
@@ -65,19 +65,24 @@ void setup() {
   digitalWrite(ms1,HIGH);
   digitalWrite(ms2,HIGH);
   digitalWrite(ms3,HIGH);
+  digitalWrite(dir,LOW);
   digitalWrite(slp,HIGH);
   digitalWrite(res,HIGH);
-  digitalWrite(dir,LOW);
   
   Serial.begin(9600);
+  commandString.reserve(200);
 }
 
 void loop() {
+  int change_speed = 0;
+  int change_dir = 0;
   buttonReading = digitalRead(but);
   dirVar = digitalRead(dirBut);
-  potReading = analogRead(speed_control);
+  potReading = analogRead(speed_control); 
+
+  bool dirCon = (dirVar != lastDir);
     
-  if ((buttonReading != lastButtonState) || (dirVar != lastDir)){
+  if ((buttonReading != lastButtonState) || dirCon){
     lastDebounceTime = millis();
   }
   if ((millis() - debounceDelay) > lastDebounceTime){
@@ -96,40 +101,35 @@ void loop() {
     }
 
     //changing direction
-    if (dirVar != dirState){
-      //Serial.println(flip);
-      flip = (flip+1) % 2;
-      dirState = dirVar;
-      digitalWrite(dir,flip); 
-    }
+    if (dirVar != 0){
+      if (dirState == LOW){
+        dirState = HIGH;
+        change_dir = 1;
+      }
+      else{
+        dirState = LOW;
+        change_dir = 1;
+      }      
+   }
   }
   //for display not to refresh all the time
   if ((potReading > setReading + thres) || (potReading < setReading - thres)){
     setReading = potReading;
-    change = 1;
+    change_speed = 1;
   }
-  int run_time = (3200/signal_freq)*100*1000; //secs for 100 rotations
-  int start_run = millis(); 
-  drawtext(change, oldReading, potReading, lowerBoundFreq, upperBoundFreq);
-  change = 0;
+  //int run_time = (3200/signal_freq)*100*1000; //secs for 100 rotations
+  //int start_run = millis(); 
+  bool change = (change_speed||change_dir);
+  drawtext(change, oldReading, potReading, lowerBoundFreq, upperBoundFreq, dirState);
   lastButtonState = buttonReading;
   lastDir = dirVar;
-  //analogWrite(stp,127);   Running continuously
-  if (start_run <= run_time){
-    digitalWrite(dir,LOW);
-    analogWrite(stp,127);
-  }
-  if ((start_run > run_time) & (start_run <= (2*run_time))){
-    digitalWrite(dir,HIGH);
-    analogWrite(stp,127);
-  }
-  if (start_run > (2*run_time)){
-    analogWrite(stp,0);  
-  }
+  digitalWrite(dir,dirState); 
+  //analogWrite(stp,127);
+  runComm();
 }
 
 //Functions to write on the LCD
-void drawtext(int buttonState, int oldReading1, int reading, int lowerBoundFreq, int upperBoundFreq){
+void drawtext(int buttonState, int oldReading1, int reading, int lowerBoundFreq, int upperBoundFreq, int dirState){
   if (buttonState){
     tft.fillScreen(ST7735_BLACK);
     tft.setCursor(0,0);
@@ -137,12 +137,48 @@ void drawtext(int buttonState, int oldReading1, int reading, int lowerBoundFreq,
     tft.print("Current freq:");
     tft.println(map(oldReading1,0,1023,lowerBoundFreq,upperBoundFreq));
     tft.setCursor(0,50);
-    tft.println("Set freq:");
+    tft.print("Set freq:");
     tft.println(map(reading,0,1023,lowerBoundFreq,upperBoundFreq));
+    tft.print("Direction: ");
+    tft.println(dirState);
     //setReading = reading;      
   }
 }
 
 void setRotation(uint8_t rotation);
+
+void serialEvent() {
+  String temp;
+  while (Serial.available()) {
+    char inChar = (char)Serial.read();
+    if (inChar == '*') {
+      //stringComplete = true;
+      break;
+    }
+    else{
+      commandString += inChar;
+    }
+  }
+}
+
+//function to run the motor. Takes number of of steps
+//command in the format #steps + '*' (et. 100*, 100 steps)
+void runComm(){
+  int st = commandString.toInt();
+  int cycle_period = int((100000/signal_freq)+0.5);
+  int run_time = (1/signal_freq)*st*1000000; //secs for steps in micros();
+
+  unsigned long startTime = micros();
+  unsigned long endTime = startTime + run_time;
+  while (micros() < endTime){
+    analogWrite(stp,127);
+  }  
+}
+
+//convert to microseconds time for number of steps using the set frequency
+double stepsToTime(int number_of_steps, int PWM_freq){
+  double period = (1/PWM_freq) * pow(10,9);
+  return (period*number_of_steps);
+}
 
 
