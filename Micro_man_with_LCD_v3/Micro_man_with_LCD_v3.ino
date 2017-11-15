@@ -60,8 +60,10 @@ void setup() {
   pinMode(ena,OUTPUT);
   pinMode(but,INPUT);
   pinMode(dirBut,INPUT);
+
+  pinMode(stp,OUTPUT);
   
-  analogWriteFrequency(stp,signal_freq); 
+  //analogWriteFrequency(stp,signal_freq); 
 
   digitalWrite(ms1,HIGH);
   digitalWrite(ms2,HIGH);
@@ -160,7 +162,7 @@ void serialEvent() {
   String temp;
   while (Serial.available()) {
     char inChar = (char)Serial.read();
-    if (inChar == ' ') {
+    if (inChar == '*') {
       stringComplete = true;
       break;
     }
@@ -174,19 +176,29 @@ void serialEvent() {
 //command in the format #steps + '*' (et. 100*, 100 steps)
 void runComm(){
   int st = commandString.toInt();
-  Serial.println(st);
+  //Serial.println(st);
   int cycle_period = int((1000000/signal_freq)+0.5);
-  Serial.println(cycle_period);
+  //Serial.println(cycle_period);
   int run_time = (1.0/signal_freq)*st*1000000; //secs for steps in micros();
-  int run_time = stepsToTime(st);
-  Serial.println(run_time);
+  //int run_time = stepsToTime(st);
+  //Serial.println(run_time);
 
-  unsigned long startTime = micros();
-  unsigned long endTime = startTime + run_time;
-  analogWrite(stp,127);
+  //unsigned long startTime = micros();
+  //unsigned long endTime = startTime + run_time;
+  for (int t = 0; t <= 1; t++){
+    for(int u = 0; u <= (st); u++){
+      unsigned long startTime = micros();
+      digitalWriteFast(stp,HIGH);
+      while(micros()<(startTime+cycle_period/2));
+      digitalWriteFast(stp,LOW);
+      while(micros()<startTime+cycle_period);
+    } 
+    digitalWrite(dir,HIGH);
+  }
+  /*analogWrite(stp,127);
   while (micros() < endTime){
   }  
-  analogWrite(stp,0);
+  analogWrite(stp,0);*/
 }
 
 //convert to microseconds time for number of steps using the set frequency
