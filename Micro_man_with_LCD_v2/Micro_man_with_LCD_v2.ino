@@ -41,6 +41,7 @@ int dirVar;
 int lastDir = 0;
 int dirState = 0;
 int iniDir = 0;
+bool stringComplete = false;
 
 String commandString;
 
@@ -125,7 +126,12 @@ void loop() {
   lastDir = dirVar;
   digitalWrite(dir,dirState); 
   //analogWrite(stp,127);
-  runComm();
+  serialEvent();
+  if (stringComplete){
+    runComm();
+    stringComplete = false;
+    commandString = ""; 
+  }
 }
 
 //Functions to write on the LCD
@@ -152,7 +158,7 @@ void serialEvent() {
   while (Serial.available()) {
     char inChar = (char)Serial.read();
     if (inChar == '*') {
-      //stringComplete = true;
+      stringComplete = true;
       break;
     }
     else{
