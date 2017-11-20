@@ -22,7 +22,7 @@
 
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 
-int signal_freq = 500;  //set the initial speed
+int signal_freq = 10000;  //set the initial speed
 int buttonReading = 1;
 signed long execute_time;
 unsigned long lastDebounceTime = 0;
