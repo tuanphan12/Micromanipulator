@@ -2,27 +2,29 @@
 #include <Adafruit_ST7735.h> // Hardware-specific library
 #include <SPI.h>
 
-//Teensy definitions
-#define speed_control 14 //map with the PWM frequency
-#define stp 10 //PWM
-#define ms1 9
-#define ms2 8
-#define ms3 7
-#define slp 6 //inverting pin
-#define res 5 //inverting pin, need to set high for the outputs to work
-#define ena 4 //inverting pin
-#define dir 3
-#define but 2
-#define dirBut 1
+#define speed_control 34 //map with the PWM frequency
+#define stp 32 //PWM
+#define ms1 33
+#define ms2 25
+#define ms3 26
+#define slp 27 //inverting pin
+#define res 14 //inverting pin, need to set high for the outputs to work
+#define ena 12 //inverting pin
+#define dir 13
 
-#define TFT_CS     15
+#define but 4
+#define dirBut 2 
+
+#define TFT_CS     21
 #define TFT_RST    16  // you can also connect this to the Arduino reset
                       // in which case, set this #define pin to -1!
 #define TFT_DC     17
-
 Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
 
-int signal_freq = 10000;  //set the initial speed
+int channel = 0;
+int resolution = 8;
+
+int signal_freq = 5000;  //set the initial speed
 int buttonReading = 1;
 signed long execute_time;
 unsigned long lastDebounceTime = 0;
@@ -46,24 +48,24 @@ bool stringComplete = false;
 String commandString;
 
 void setup() {
+  // put your setup code here, to run once:
+
   // Use this initializer if you're using a 1.8" TFT
   tft.initR(INITR_BLACKTAB);   // initialize a ST7735S chip, black tab
   tft.setRotation(1);
   
+  Serial.begin(115200);
+  commandString.reserve(200);
   pinMode(ms1,OUTPUT);
   pinMode(ms2,OUTPUT);  
   pinMode(ms3,OUTPUT);    
   pinMode(dir,OUTPUT);
-  //pinMode(stp,OUTPUT);
   pinMode(slp,OUTPUT);
   pinMode(res,OUTPUT);
   pinMode(ena,OUTPUT);
+  pinMode(stp,OUTPUT);
   pinMode(but,INPUT);
   pinMode(dirBut,INPUT);
-
-  pinMode(stp,OUTPUT);
-  
-  //analogWriteFrequency(stp,signal_freq); 
 
   digitalWrite(ms1,HIGH);
   digitalWrite(ms2,HIGH);
@@ -71,9 +73,10 @@ void setup() {
   digitalWrite(dir,LOW);
   digitalWrite(slp,HIGH);
   digitalWrite(res,HIGH);
-  
-  Serial.begin(9600);
-  commandString.reserve(200);
+
+  //ledcSetup(channel, signal_freq, resolution);
+  //ledcAttachPin(stp,channel);
+  //ledcWrite(channel,255);
 }
 
 void loop() {
@@ -95,11 +98,11 @@ void loop() {
         change = 1;
         //Serial.print("Pot reading:");
         //Serial.println(potReading);
-        signal_freq = map(potReading,0,1023,lowerBoundFreq,upperBoundFreq);
+        signal_freq = map(potReading,0,4095,lowerBoundFreq,upperBoundFreq);
         oldReading = potReading;
-        //Serial.println(signal_freq);
+        Serial.println(signal_freq);
         //Serial.println("here");
-        analogWriteFrequency(stp,signal_freq);
+        //ledcWriteTone(channel,signal_freq);
       } 
     }
 
@@ -115,6 +118,8 @@ void loop() {
       }      
    }
   }
+
+  signal_freq = map(potReading,0,4095,lowerBoundFreq,upperBoundFreq);
   //for display not to refresh all the time
   if ((potReading > setReading + thres) || (potReading < setReading - thres)){
     setReading = potReading;
@@ -131,8 +136,11 @@ void loop() {
   //delay(500);
   serialEvent();
   if (stringComplete){
-    Serial.print("Here");
-    Serial.print(commandString);
+    //Serial.print("Here");
+    Serial.print("frequency:");
+    Serial.println(signal_freq);
+    Serial.println(potReading);
+    //Serial.println(commandString);
     runComm();
     stringComplete = false;
     commandString = ""; 
@@ -195,10 +203,6 @@ void runComm(){
     } 
     digitalWrite(dir,HIGH);
   }
-  /*analogWrite(stp,127);
-  while (micros() < endTime){
-  }  
-  analogWrite(stp,0);*/
 }
 
 //convert to microseconds time for number of steps using the set frequency
@@ -206,5 +210,3 @@ double stepsToTime(int number_of_steps, int PWM_freq){
   double period = (1.0/PWM_freq) * pow(10,9);
   return (period*number_of_steps);
 }
-
-
