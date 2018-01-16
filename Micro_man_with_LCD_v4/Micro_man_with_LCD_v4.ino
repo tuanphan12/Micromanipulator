@@ -1,6 +1,6 @@
-#include <Adafruit_GFX.h>    // Core graphics library
-#include <Adafruit_ST7735.h> // Hardware-specific library
 #include <SPI.h>
+#include <U8g2lib.h>
+#define DELAY 300
 
 #define speed_control 34 //map with the PWM frequency
 #define stp 32 //PWM
@@ -15,11 +15,8 @@
 #define but 4
 #define dirBut 2 
 
-#define TFT_CS     21
-#define TFT_RST    16  // you can also connect this to the Arduino reset
-                      // in which case, set this #define pin to -1!
-#define TFT_DC     17
-Adafruit_ST7735 tft = Adafruit_ST7735(TFT_CS,  TFT_DC, TFT_RST);
+// Set up the oled object
+U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled(U8G2_R0, 5, 17, 16);
 
 int channel = 0;
 int resolution = 8;
@@ -50,9 +47,8 @@ String commandString;
 void setup() {
   // put your setup code here, to run once:
 
-  // Use this initializer if you're using a 1.8" TFT
-  tft.initR(INITR_BLACKTAB);   // initialize a ST7735S chip, black tab
-  tft.setRotation(1);
+  oled.begin();
+  oled.setFont(u8g2_font_ncenB10_tr);    
   
   Serial.begin(115200);
   commandString.reserve(200);
@@ -150,17 +146,22 @@ void loop() {
 //Functions to write on the LCD
 void drawtext(int buttonState, int oldReading1, int reading, int lowerBoundFreq, int upperBoundFreq, int dirState){
   if (buttonState){
-    tft.fillScreen(ST7735_BLACK);
-    tft.setCursor(0,0);
-    tft.setTextSize(2);
-    tft.print("Current freq:");
-    tft.println(map(oldReading1,0,1023,lowerBoundFreq,upperBoundFreq));
-    tft.setCursor(0,50);
-    tft.print("Set freq:");
-    tft.println(map(reading,0,1023,lowerBoundFreq,upperBoundFreq));
-    tft.print("Direction: ");
-    tft.println(dirState);
-    //setReading = reading;      
+    //tft.fillScreen(ST7735_BLACK);
+    oled.clearBuffer();
+    oled.setCursor(0,15);
+    //oled.setTextSize(2);
+    oled.print("Curr freq: ");
+    oled.println(map(oldReading1,0,4095,lowerBoundFreq,upperBoundFreq));
+    oled.setCursor(0,35);
+    oled.print("Set freq: ");
+    oled.println(map(reading,0,4095,lowerBoundFreq,upperBoundFreq));
+    oled.setCursor(0,55);
+    oled.print("Direction: ");
+    oled.println(dirState);
+    //setReading = reading;  
+
+    oled.sendBuffer();
+    delay(300);
   }
 }
 
