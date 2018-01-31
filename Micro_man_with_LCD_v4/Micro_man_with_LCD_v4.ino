@@ -21,7 +21,7 @@ U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled(U8G2_R0, 5, 17, 16);
 int channel = 0;
 int resolution = 8;
 
-int signal_freq = 1500;  //set the initial speed
+int signal_freq = 2000;  //set the initial speed
 int buttonReading = 1;
 signed long execute_time;
 unsigned long lastDebounceTime = 0;
@@ -115,14 +115,11 @@ void loop() {
    }
   }
 
-  //signal_freq = map(potReading,0,4095,lowerBoundFreq,upperBoundFreq);
   //for display not to refresh all the time
   if ((potReading > setReading + thres) || (potReading < setReading - thres)){
     setReading = potReading;
     change_speed = 1;
   }
-  //int run_time = (3200/signal_freq)*100*1000; //secs for 100 rotations
-  //int start_run = millis(); 
   bool change = (change_speed||change_dir);
   drawtext(change, oldReading, potReading, lowerBoundFreq, upperBoundFreq, dirState);
   lastButtonState = buttonReading;
@@ -132,7 +129,6 @@ void loop() {
   //delay(500);
   serialEvent();
   if (stringComplete){
-    //Serial.print("Here");
     Serial.print("frequency:");
     Serial.println(signal_freq);
     Serial.println(potReading);
