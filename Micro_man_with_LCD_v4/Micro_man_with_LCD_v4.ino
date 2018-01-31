@@ -115,7 +115,7 @@ void loop() {
    }
   }
 
-  signal_freq = map(potReading,0,4095,lowerBoundFreq,upperBoundFreq);
+  //signal_freq = map(potReading,0,4095,lowerBoundFreq,upperBoundFreq);
   //for display not to refresh all the time
   if ((potReading > setReading + thres) || (potReading < setReading - thres)){
     setReading = potReading;
