@@ -21,7 +21,7 @@ U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled(U8G2_R0, 5, 17, 16);
 int channel = 0;
 int resolution = 8;
 
-int signal_freq = 2000;  //set the initial speed
+int signal_freq = 1000;  //set the initial speed
 int buttonReading = 1;
 signed long execute_time;
 unsigned long lastDebounceTime = 0;
