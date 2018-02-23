@@ -4,6 +4,7 @@ n = 0;
 first_pt = 0;
 second_pt = 0;
 pts = zeros(2,2);
+S = 'Ready for the second point';
 
 while 1
     while hasFrame(v)
@@ -25,12 +26,21 @@ while 1
                 pts(2,1) = xi;
                 pts(2,2) = yi;
                 n = n + 1;
+                second_pt = 1;
+                break;
             end
         end
     end
+    disp(S)
     v.CurrentTime = v.Duration/2.0;
     n = 1;
+    if (second_pt == 1)
+        close(figure(1));
+        break;
+    end
 end
+
+%close(figure(1));
 
 %move = read(v);
 %implay(move)
