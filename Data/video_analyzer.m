@@ -1,4 +1,4 @@
-v = VideoReader('a_2_100_steps_138_hz.avi');
+v = VideoReader('g_2_500_steps_499_hz.mp4');
 numFrames = 0;
 n = 0;
 first_pt = 0;
@@ -32,13 +32,15 @@ while 1
         end
     end
     disp(S)
-    v.CurrentTime = v.Duration/2.0;
+    v.CurrentTime = v.Duration/10;
     n = 1;
     if (second_pt == 1)
         close(figure(1));
         break;
     end
 end
+
+pts
 
 %close(figure(1));
 

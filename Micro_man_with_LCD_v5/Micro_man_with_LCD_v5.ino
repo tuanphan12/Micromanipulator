@@ -38,7 +38,7 @@ int thres = 10;
 int setReading;
 int dirVar;
 int lastDir = 0;
-int dirState = 0;
+int dirState = 0;  //1 is pushing out; 0 is pulling in
 int iniDir = 0;
 bool stringComplete = false;
 
@@ -190,6 +190,8 @@ void runComm(){
 
   //unsigned long startTime = micros();
   //unsigned long endTime = startTime + run_time;
+  //digitalWrite(dir,0);
+  //for(int k = 0; k <= 1; k++){
     for(int u = 0; u <= (st); u++){
       unsigned long startTime = micros();
       digitalWrite(stp,HIGH);
@@ -197,6 +199,8 @@ void runComm(){
       digitalWrite(stp,LOW);
       while(micros()<startTime+cycle_period);
     } 
+    //digitalWrite(dir,1);
+  //}
 }
 
 //convert to microseconds time for number of steps using the set frequency
