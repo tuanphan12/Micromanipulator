@@ -1,4 +1,4 @@
-v = VideoReader('g_2_500_steps_499_hz.mp4');
+v = VideoReader('g_9_500_steps_499_hz.mp4');
 numFrames = 0;
 n = 0;
 first_pt = 0;
