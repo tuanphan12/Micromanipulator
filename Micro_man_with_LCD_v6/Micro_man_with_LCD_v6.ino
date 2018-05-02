@@ -5,6 +5,7 @@
 #define speed_control 34 //map with the PWM frequency
 #define stp1 32 //motor 1 (platform)
 #define stp2 22  //motor 2 (bottom axis)
+#define stp3 21  //motor 3 (z-axis)
 #define ms1 33
 #define ms2 25
 #define ms3 26
@@ -24,7 +25,7 @@ U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled(U8G2_R0, 5, 17, 16);
 int channel = 0;
 int resolution = 8;
 
-int signal_freq = 1000;  //set the initial speed
+int signal_freq = 2000;  //set the initial speed
 int buttonReading_1;
 int buttonReading_2;
 signed long execute_time;
@@ -39,6 +40,7 @@ bool stringComplete = false;
 int axis;
 int motorState = 0;
 String axisStr = "";
+int st;  //number of steps
 
 String commandString;
 
@@ -135,6 +137,7 @@ void setup() {
   pinMode(ena,OUTPUT);
   pinMode(stp1,OUTPUT);
   pinMode(stp2,OUTPUT);
+  pinMode(stp3,OUTPUT);
   pinMode(button_1,INPUT_PULLUP);
   pinMode(button_2,INPUT_PULLUP);
 
@@ -149,7 +152,6 @@ void setup() {
 void loop() {
   int change_speed = 0;
   int change_dir = 0;
-  int st = 0;
   buttonReading_1 = firstButton.update();
   buttonReading_2 = secondButton.update();
   potReading = analogRead(speed_control); 
@@ -167,9 +169,16 @@ void loop() {
       axis = stp2;
       axisStr = "Bottom Platform";        
       if (buttonReading_1 == SHORT_PRESS){
+        motorState = 2;  
+      }
+      break;   
+    case 2: //axis 2 (bottom platform)
+      axis = stp3;
+      axisStr = "Z-Axis";        
+      if (buttonReading_1 == SHORT_PRESS){
         motorState = 0;  
       }
-      break;      
+      break;    
   }
 
   //change frequency of the motor
@@ -207,4 +216,9 @@ void loop() {
     stringComplete = false;
     commandString = ""; 
   }
+  
+  if (buttonReading_1 == LONG_PRESS){
+    runComm(st,axis);
+  }
+  
 }
