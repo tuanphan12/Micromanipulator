@@ -25,7 +25,7 @@ U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled(U8G2_R0, 5, 17, 16);
 int channel = 0;
 int resolution = 8;
 
-int signal_freq = 2000;  //set the initial speed
+int signal_freq = 1000;  //set the initial speed
 int buttonReading_1;
 int buttonReading_2;
 signed long execute_time;
@@ -35,12 +35,12 @@ int potReading = 0;
 int oldReading = signal_freq; 
 int thres = 25;
 int setReading;
-int dirState = 0;  //1 is pushing out; 0 is pulling in
+int dirState = 0;  //0 is pushing in; 1 is pulling out
 bool stringComplete = false;
 int axis;
 int motorState = 0;
 String axisStr = "";
-int st;  //number of steps
+int st = 1000;  //number of steps
 
 String commandString;
 
@@ -152,6 +152,7 @@ void setup() {
 void loop() {
   int change_speed = 0;
   int change_dir = 0;
+  int change_axis = 0;
   buttonReading_1 = firstButton.update();
   buttonReading_2 = secondButton.update();
   potReading = analogRead(speed_control); 
@@ -160,21 +161,24 @@ void loop() {
   switch (motorState){
     case 0: //axis 1 (mounting platform)
       axis = stp1;
-      axisStr = "Mounting Platform";      
+      axisStr = "Mounting Platform";   
+      change_axis = 1;   
       if (buttonReading_1 == SHORT_PRESS){
         motorState = 1;
       }
       break;
     case 1: //axis 2 (bottom platform)
       axis = stp2;
-      axisStr = "Bottom Platform";        
+      axisStr = "Bottom Platform";
+      change_axis = 1;        
       if (buttonReading_1 == SHORT_PRESS){
         motorState = 2;  
       }
       break;   
     case 2: //axis 2 (bottom platform)
       axis = stp3;
-      axisStr = "Z-Axis";        
+      axisStr = "Z-Axis";
+      change_axis = 1;        
       if (buttonReading_1 == SHORT_PRESS){
         motorState = 0;  
       }
@@ -199,7 +203,7 @@ void loop() {
     change_speed = 1;
   }
   
-  bool change = (change_speed||change_dir);
+  bool change = (change_speed||change_dir||change_axis);
   drawtext(change, axisStr, oldReading, potReading, lowerBoundFreq, upperBoundFreq, dirState);
 
   digitalWrite(dir,dirState); 
