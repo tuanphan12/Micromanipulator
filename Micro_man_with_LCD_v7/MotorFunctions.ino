@@ -1,25 +1,22 @@
 //function for the oled
-void drawtext(bool change_, String axis_, int oldReading_, int reading_, int lowerBoundFreq_, int upperBoundFreq_, int dirState_){
-  if (change_){
-    //tft.fillScreen(ST7735_BLACK);
-    oled.clearBuffer();
-    oled.setCursor(0,10);
-    oled.print("Axis: ");
-    oled.println(axis_);
-    oled.setCursor(0,20);
-    oled.print("Curr freq: ");
-    oled.println(map(oldReading_,0,4095,lowerBoundFreq_,upperBoundFreq_));
-    oled.setCursor(0,30);
-    oled.print("Set freq: ");
-    oled.println(map(reading_,0,4095,lowerBoundFreq_,upperBoundFreq_));
+void drawtext(String axis_, float speed_axis_ , float dirState_ , bool isHome_){
+  //tft.fillScreen(ST7735_BLACK);
+   oled.clearBuffer();
+   oled.setCursor(0,10);
+   oled.print("Axis: ");
+   oled.println(axis_);
+   oled.setCursor(0,20);
+   oled.print("Curr freq: ");
+   oled.println(speed_axis_);
+   oled.setCursor(0,30);
+   oled.print("Direction: ");
+   oled.println(dirState_);
+   if (isHome_){
     oled.setCursor(0,40);
-    oled.print("Direction: ");
-    oled.println(dirState_);
-    //setReading = reading;  
-
-    oled.sendBuffer();
-    delay(1);
-  }
+    oled.println("HOME");
+   }
+   
+   oled.sendBuffer();
 }
 
 void setRotation(uint8_t rotation);
@@ -38,12 +35,20 @@ void runComm(int steps_, int motor_){
   //unsigned long endTime = startTime + run_time;
   //digitalWrite(dir1,0);
   //for(int k = 0; k <= 1; k++){
+    isHome = false;
     for(int u = 0; u <= (steps_); u++){
       unsigned long startTime = micros();
       digitalWrite(motor_,HIGH);
       while(micros()<(startTime+cycle_period/2));
       digitalWrite(motor_,LOW);
       while(micros()<startTime+cycle_period);
+      hall_reading = analogRead(hall);
+      Serial.println(hall_reading);
+     // if (x_home(hall_reading)){  //if the hall sensor pass a certain threshold then this exit the for loop
+      //  isHome = 1;
+       // Serial.println("Here");
+       // break;
+      //}
     } 
     //digitalWrite(dir1,1);
   //}
