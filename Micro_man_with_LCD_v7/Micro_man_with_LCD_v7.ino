@@ -76,7 +76,8 @@ void setup() {
 
   delay(500); //initial wait for safety
   //cm.connect("J2","18611865");//change as needed.
-  cm.connect("6s08","iesc6s08");
+  //cm.connect("6s08","iesc6s08");
+  cm.connect("xfinity-203-03","cattle1331cover2");
   //cm.connect("EECS-MTL-RLE","");
   cm.addSlider("Speed in Hz",0,2000,1,false, &signal_freq); //add a slider called speed for axis speed
   cm.addSlider("Number of step",0,10000,1,false, &st); //number of steps

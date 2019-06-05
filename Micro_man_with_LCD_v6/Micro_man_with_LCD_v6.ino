@@ -25,7 +25,7 @@ U8G2_SH1106_128X64_NONAME_F_4W_HW_SPI oled(U8G2_R0, 5, 17, 16);
 int channel = 0;
 int resolution = 8;
 
-int signal_freq = 1000;  //set the initial speed
+int signal_freq = 500;  //set the initial speed
 int buttonReading_1;
 int buttonReading_2;
 signed long execute_time;
@@ -40,7 +40,7 @@ bool stringComplete = false;
 int axis;
 int motorState = 0;
 String axisStr = "";
-int st = 1000;  //number of steps
+int st = 10000;  //number of steps
 
 String commandString;
 
@@ -161,7 +161,7 @@ void loop() {
   switch (motorState){
     case 0: //axis 1 (mounting platform)
       axis = stp1;
-      axisStr = "Mounting Platform";   
+      axisStr = "Axis 1";   
       change_axis = 1;   
       if (buttonReading_1 == SHORT_PRESS){
         motorState = 1;
@@ -169,7 +169,7 @@ void loop() {
       break;
     case 1: //axis 2 (bottom platform)
       axis = stp2;
-      axisStr = "Bottom Platform";
+      axisStr = "Axis 2";
       change_axis = 1;        
       if (buttonReading_1 == SHORT_PRESS){
         motorState = 2;  
@@ -177,7 +177,7 @@ void loop() {
       break;   
     case 2: //axis 2 (bottom platform)
       axis = stp3;
-      axisStr = "Z-Axis";
+      axisStr = "Axis 3";
       change_axis = 1;        
       if (buttonReading_1 == SHORT_PRESS){
         motorState = 0;  
@@ -187,8 +187,8 @@ void loop() {
 
   //change frequency of the motor
   if (buttonReading_2 == SHORT_PRESS){
-    oldReading = potReading; //updated frequency
-    signal_freq = map(potReading,0,4095,lowerBoundFreq,upperBoundFreq);    
+    signal_freq = map(potReading,0,4095,lowerBoundFreq,upperBoundFreq); 
+    oldReading = signal_freq; //updated frequency   
   }
 
   //change direction. Same pin
@@ -216,12 +216,14 @@ void loop() {
     //Serial.println(potReading);
     //Serial.println(commandString);
     st = commandString.toInt();
-    runComm(st,axis);
+    //runComm(st,axis);
     stringComplete = false;
     commandString = ""; 
   }
   
   if (buttonReading_1 == LONG_PRESS){
+    Serial.print("Steps: ");
+    Serial.println(st);
     runComm(st,axis);
   }
   

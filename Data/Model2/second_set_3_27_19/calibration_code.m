@@ -1,0 +1,1 @@
+points = readPoints('calibrate_2_032819.png',2)

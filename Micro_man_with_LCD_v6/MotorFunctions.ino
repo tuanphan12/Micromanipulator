@@ -8,7 +8,7 @@ void drawtext(bool change_, String axis_, int oldReading_, int reading_, int low
     oled.println(axis_);
     oled.setCursor(0,20);
     oled.print("Curr freq: ");
-    oled.println(map(oldReading_,0,4095,lowerBoundFreq_,upperBoundFreq_));
+    oled.println(oldReading_);
     oled.setCursor(0,30);
     oled.print("Set freq: ");
     oled.println(map(reading_,0,4095,lowerBoundFreq_,upperBoundFreq_));
